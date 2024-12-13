@@ -29,6 +29,10 @@
 //-->
 
 
+
+
+// src/modules/gameState.js
+
 import { INITIAL_FUNDS } from './config.js';
 
 export class GameState {
@@ -37,8 +41,7 @@ export class GameState {
     this.pickups = [];
     this.dropOffs = [];
     this.thugs = [];
-    this.funds = 0; // Set funds to $0 initially
-    this.carriedMoney = INITIAL_FUNDS; // Initialize carriedMoney to $100
+    this.carriedMoney = INITIAL_FUNDS; // Dealer starts with $100
     this.stashedMoney = 0;
     this.gameOver = false;
     this.round = 1;
@@ -53,7 +56,6 @@ export class GameState {
     this.pickups = [];
     this.dropOffs = [];
     this.thugs = [];
-    this.funds = 0; // Reset funds to $0
     this.carriedMoney = INITIAL_FUNDS; // Reset carriedMoney to $100
     this.stashedMoney = 0;
     this.gameOver = false;
@@ -63,18 +65,44 @@ export class GameState {
       B: 0,
       C: 0
     };
+    console.log('GameState initialized:', this.getStateSnapshot());
   }
 
   nextRound() {
     this.round += 1;
     this.dropOffs = []; // Clear previous drop-offs
     this.thugs = []; // Clear thugs from previous round
-    // Optionally reset drug inventory if needed
+    console.log(`Proceeding to Round ${this.round}`);
   }
 
   checkGameOver() {
-    if (this.funds + this.carriedMoney <= 0) {
+    if (this.carriedMoney <= 0) { // Only check carriedMoney
       this.gameOver = true;
+      console.log('Game Over Condition Met: Carried Money <= 0');
     }
+  }
+
+  // Methods to modify carriedMoney
+  addCarriedMoney(amount) {
+    this.carriedMoney += amount;
+    console.log(`Added $${amount} to carriedMoney. New carriedMoney: $${this.carriedMoney}`);
+  }
+
+  subtractCarriedMoney(amount) {
+    this.carriedMoney -= amount;
+    console.log(`Subtracted $${amount} from carriedMoney. New carriedMoney: $${this.carriedMoney}`);
+  }
+
+  getStateSnapshot() {
+    return {
+      carriedMoney: this.carriedMoney,
+      stashedMoney: this.stashedMoney,
+      round: this.round,
+      gameOver: this.gameOver,
+      drugInventory: { ...this.drugInventory },
+      pickups: [...this.pickups],
+      dropOffs: [...this.dropOffs],
+      thugs: [...this.thugs]
+    };
   }
 }

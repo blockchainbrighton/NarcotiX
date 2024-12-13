@@ -1,4 +1,4 @@
-// modules/ui.js
+
 
 //<!-- 
 {/* <details>
@@ -30,6 +30,10 @@
 
 
 
+
+
+// src/modules/ui.js
+
 import { STASH_LIMIT } from './config.js';
 
 export class UI {
@@ -49,14 +53,20 @@ export class UI {
   updateCashHoldings() {
     const cashHoldingsElement = document.getElementById('cashHoldings');
     if (cashHoldingsElement) {
-      cashHoldingsElement.textContent = `$${this.state.funds}`;
+      cashHoldingsElement.textContent = `$${this.state.carriedMoney}`;
+      console.log(`Updated Cash Holdings: $${this.state.carriedMoney}`);
+    } else {
+      console.warn('Element with ID "cashHoldings" not found.');
     }
   }
 
   updateCurrentStash() {
     const currentStashElement = document.getElementById('currentStash');
     if (currentStashElement) {
-      currentStashElement.textContent = `$${this.stash.stashedMoney}`;
+      currentStashElement.textContent = `$${this.state.stashedMoney}`;
+      console.log(`Updated Current Stash: $${this.state.stashedMoney}`);
+    } else {
+      console.warn('Element with ID "currentStash" not found.');
     }
   }
 
@@ -71,6 +81,9 @@ export class UI {
         li.textContent = `Drop-off ${index + 1}: ${dropOff.requiredDrug} → $${dropOff.price}`;
         dropOffListElement.appendChild(li);
       });
+      console.log('Updated Drop-Off List');
+    } else {
+      console.warn('Element with ID "dropOffList" not found.');
     }
   }
 
@@ -78,6 +91,7 @@ export class UI {
     const modal = document.getElementById('stashModal');
     if (modal) {
       modal.style.display = 'block';
+      console.log('Stash Decision Modal Displayed');
 
       // Handle form submission
       const form = document.getElementById('stashForm');
@@ -98,6 +112,7 @@ export class UI {
         }
 
         modal.style.display = 'none';
+        console.log(`Stash Decision: Stash $${stashAmount}, Carry $${carryAmount}`);
         callback(stashAmount, carryAmount);
       };
 
@@ -105,6 +120,7 @@ export class UI {
       const closeBtn = document.getElementById('closeStashModal');
       closeBtn.onclick = () => {
         modal.style.display = 'none';
+        console.log('Stash Decision Modal Closed Without Decision');
         // Optionally, default to carrying all money
         callback(0, this.state.carriedMoney);
       };
@@ -135,6 +151,7 @@ export class UI {
       `;
 
       document.body.appendChild(modal);
+      console.log('Stash Modal Created');
     }
   }
 

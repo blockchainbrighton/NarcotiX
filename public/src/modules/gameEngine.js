@@ -35,6 +35,9 @@
 // </details>
 // -->
 
+
+// src/modules/gameEngine.js
+
 import { Logger } from './logger.js';
 import { Dealer } from './dealer.js';
 import { InputController } from './inputController.js';
@@ -58,8 +61,6 @@ const logger = new Logger();
 // Initialize the game state
 const state = new GameState(GRID_SIZE);
 state.logger = logger; // Attach logger to state for global access
-
-
 
 // Initialize canvas
 const canvas = document.getElementById('gameCanvas');
@@ -85,7 +86,6 @@ const input = new InputController(dealer, logger); // Pass logger to InputContro
 const renderer = new Renderer(ctx, state, dealer, stash);
 const ui = new UI(state, stash); // Initialize UI
 
-
 // Game Loop
 function gameLoop(timestamp) {
   if (state.gameOver) {
@@ -102,7 +102,7 @@ function gameLoop(timestamp) {
       spawnPickups(state);
       // Removed: logger.logEvent('DealerMove', ...)
 
-      // Only spawn drop-offs if dealer has drugs and no drop-offs exist
+      // Only spawn drop-offs if dealer has money and no drop-offs exist
       if (state.carriedMoney > 0 && state.dropOffs.length === 0) { 
         spawnDropOffs(state);
         // Removed redundant DropOffSpawn log as it's handled in collision.js
@@ -135,6 +135,7 @@ function gameLoop(timestamp) {
         });
       }
 
+      // Update UI after moving the dealer and handling collisions
       ui.updateCashHoldings();
       ui.updateCurrentStash();
       ui.updateDropOffList();
@@ -165,12 +166,14 @@ function displayGameOver() {
   const hud = document.getElementById('hud');
   if (hud) {
     hud.textContent = `Game Over! Total Stashed: $${state.stashedMoney}`;
+    console.log(`Game Over! Total Stashed: $${state.stashedMoney}`);
   }
 
   const gameOverScreen = document.getElementById('gameOverScreen');
   if (gameOverScreen) {
     gameOverScreen.style.display = 'block';
     gameOverScreen.textContent = 'Game Over! Press F5 to Restart.';
+    console.log('Displayed Game Over Screen');
   }
 }
 
@@ -182,6 +185,7 @@ export function startGame() {
   ui.initializeUI(); // Ensure UI is initialized
   isPaused = false;
   logger.logEvent('GameStart', `Game started with initial funds $${INITIAL_FUNDS}.`);
+  console.log(`Game started with initial funds $${INITIAL_FUNDS}.`);
   requestAnimationFrame((timestamp) => {
     lastMoveTime = timestamp;
     gameLoop(timestamp);
@@ -192,6 +196,7 @@ export function startGame() {
 export function pauseGame() {
   isPaused = true;
   logger.logEvent('GamePause', `Game paused.`);
+  console.log('Game Paused');
   // Optionally, display a pause overlay
 }
 
@@ -199,5 +204,6 @@ export function pauseGame() {
 export function resumeGame() {
   isPaused = false;
   logger.logEvent('GameResume', `Game resumed.`);
+  console.log('Game Resumed');
   requestAnimationFrame(gameLoop);
 }

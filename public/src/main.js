@@ -27,7 +27,20 @@
 //-->
 
 
+// src/main.js
 
-import { startGame } from "./modules/gameEngine.js";
+import { GameState } from './modules/gameState.js';
+import { UI } from './modules/ui.js';
+import { startGame } from './modules/gameEngine.js';
 
-startGame();
+function init() {
+  const gameState = new GameState(GRID_SIZE); // Assuming GRID_SIZE is defined
+  const ui = new UI(gameState);
+
+  gameState.initialize();
+  ui.initializeUI();
+
+  startGame(gameState, ui); // Modify startGame to accept gameState and ui instances
+}
+
+window.addEventListener('DOMContentLoaded', init);

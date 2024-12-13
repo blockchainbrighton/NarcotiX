@@ -32,88 +32,47 @@
 </details> */}
 //-->
 
+// src/modules/collision.js
 
 import { spawnDropOffs } from './pickups.js';
 import { STASH_LIMIT, PICKUP_PRICES, DROPOFF_PRICES, INITIAL_FUNDS } from './config.js';
 
+/**
+ * Handles all collision detections and corresponding game logic.
+ * @param {Dealer} dealer - The dealer instance.
+ * @param {GameState} state - The current game state.
+ * @param {Stash} stash - The stash instance.
+ * @returns {string|null} - Returns 'stash' if stash decision is needed, otherwise null.
+ */
 export function handleCollisions(dealer, state, stash) {
   const head = dealer.head;
 
-  // Check collision with pickups
-  for (let i = 0; i < state.pickups.length; i++) {
-    const p = state.pickups[i];
-    if (p.x === head.x && p.y === head.y) {
-      // Collect pickup
-      dealer.growInventory();
-      state.pickups.splice(i, 1);
-
-      // Purchase drugs with carried money
-      const purchasedDrugs = dealer.purchaseDrugs(state);
-
-      // Log the pickup and purchase
-      state.logger.logEvent('Pickup', `Collected a pickup at (${p.x}, ${p.y}). Purchased Drugs: ${JSON.stringify(purchasedDrugs)}.`);
-
-      // Spawn drop-off points if it's the first pickup
-      if (state.carriedMoney === INITIAL_FUNDS) { // Use config constant
-        spawnDropOffs(state);
-        state.logger.logEvent('DropOffSpawn', `Spawned drop-off points after first pickup.`);
-      }
-
-      updateHUD(state.funds, state.carriedMoney, state.dropOffs, state.drugInventory);
-      break;
-    }
+  // Handle collision with pickups
+  const pickupIndex = state.pickups.findIndex(p => p.x === head.x && p.y === head.y);
+  if (pickupIndex !== -1) {
+    const pickup = state.pickups[pickupIndex];
+    handlePickupCollision(dealer, state, pickupIndex, pickup);
+    return null; // No stash decision needed after pickup
   }
 
-  // Check collision with drop-off points
-  for (let i = 0; i < state.dropOffs.length; i++) {
-    const d = state.dropOffs[i];
-    if (d.x === head.x && d.y === head.y) {
-      // Check if dealer has the required drug
-      const requiredDrug = d.requiredDrug;
-      if (state.drugInventory[requiredDrug] > 0) {
-        // Exchange one unit of the required drug for money
-        state.drugInventory[requiredDrug] -= 1;
-        state.funds += DROPOFF_PRICES[requiredDrug];
-        state.carriedMoney -= PICKUP_PRICES[requiredDrug]; // Assuming conversion
-        state.dropOffs.splice(i, 1);
-
-        // Log the drop-off and conversion
-        state.logger.logEvent('DropOff', `Converted Drug ${requiredDrug} at (${d.x}, ${d.y}) for $${DROPOFF_PRICES[requiredDrug]}.`);
-
-        dealer.depositInventory();
-        updateHUD(state.funds, state.carriedMoney, state.dropOffs, state.drugInventory);
-      } else {
-        // Inform the player they lack the required drug
-        state.logger.logEvent('DropOffAttempt', `Attempted to convert Drug ${requiredDrug} at (${d.x}, ${d.y}) but lacked the required quantity.`);
-        console.log(`Need Drug ${requiredDrug} to exchange at this drop-off.`);
-      }
-      break;
-    }
+  // Handle collision with drop-off points
+  const dropOffIndex = state.dropOffs.findIndex(d => d.x === head.x && d.y === head.y);
+  if (dropOffIndex !== -1) {
+    const dropOff = state.dropOffs[dropOffIndex];
+    handleDropOffCollision(dealer, state, stash, dropOffIndex, dropOff);
+    return null; // No stash decision needed after drop-off
   }
 
-  // Check collision with thugs
-  for (let i = 0; i < state.thugs.length; i++) {
-    const t = state.thugs[i];
-    if (t.x === head.x && t.y === head.y) {
-      // Lose all carried money
-      state.carriedMoney = 0;
-      // Optionally, reset dealer to stash
-      dealer.resetPosition();
-
-      // Log the thug collision and loss
-      state.logger.logCollision({
-        type: 'Thug',
-        involvedEntities: [`Thug at (${t.x}, ${t.y})`],
-        outcome: 'Lost all carried money.'
-      });
-
-      updateHUD(state.funds, state.carriedMoney, state.dropOffs, state.drugInventory);
-      break;
-    }
+  // Handle collision with thugs
+  const thugIndex = state.thugs.findIndex(t => t.x === head.x && t.y === head.y);
+  if (thugIndex !== -1) {
+    const thug = state.thugs[thugIndex];
+    handleThugCollision(dealer, state, thugIndex, thug);
+    return null; // No stash decision needed after thug collision
   }
 
-  // Check if at stash
-  if (head.x === stash.position.x && head.y === stash.position.y) {
+  // Handle collision with stash
+  if (isAtStashPosition(head, stash.position)) {
     if (state.carriedMoney > 0 || state.stashedMoney > 0) {
       // Log arrival at stash
       state.logger.logEvent('StashArrival', `Reached stash at (${stash.position.x}, ${stash.position.y}).`);
@@ -122,16 +81,104 @@ export function handleCollisions(dealer, state, stash) {
   }
 
   // Check game over condition
-  if (state.checkGameOver()) {
+  state.checkGameOver();
+  if (state.gameOver) {
     state.logger.logGameOver(state.stashedMoney); // Log game over event
   }
 
   return null; // No special action required
 }
 
-function updateHUD(funds, carried, dropOffs, drugInventory) {
-  const hud = document.getElementById('hud');
-  if (hud) {
-    hud.textContent = `Funds: $${funds} | Carried: $${carried} | Drugs: A(${drugInventory.A}), B(${drugInventory.B}), C(${drugInventory.C})`;
+/**
+ * Handles the collision with a pickup point.
+ * @param {Dealer} dealer 
+ * @param {GameState} state 
+ * @param {number} pickupIndex 
+ * @param {object} pickup 
+ */
+function handlePickupCollision(dealer, state, pickupIndex, pickup) {
+  // Collect pickup
+  dealer.growInventory();
+  state.pickups.splice(pickupIndex, 1);
+
+  // Purchase drugs with carried money
+  const purchasedDrugs = dealer.purchaseDrugs(state);
+
+  // Log the pickup and purchase
+  state.logger.logEvent('Pickup', `Collected a pickup at (${pickup.x}, ${pickup.y}). Purchased Drugs: ${JSON.stringify(purchasedDrugs)}.`);
+
+  // Spawn drop-off points if it's the first pickup
+  if (state.round === 1 && state.pickups.length === 0) { // Ensure it's the first round and all pickups are collected
+    spawnDropOffs(state);
+    state.logger.logEvent('DropOffSpawn', `Spawned drop-off points after first pickup.`);
   }
+
+  // No direct UI updates; observer pattern handles it
+}
+
+/**
+ * Handles the collision with a drop-off point.
+ * @param {Dealer} dealer 
+ * @param {GameState} state 
+ * @param {Stash} stash 
+ * @param {number} dropOffIndex 
+ * @param {object} dropOff 
+ */
+function handleDropOffCollision(dealer, state, stash, dropOffIndex, dropOff) {
+  const requiredDrug = dropOff.requiredDrug;
+
+  if (state.drugInventory[requiredDrug] > 0) {
+    // Exchange one unit of the required drug for money
+    state.subtractCarriedMoney(PICKUP_PRICES[requiredDrug]); // Assuming conversion cost
+    state.addCarriedMoney(DROPOFF_PRICES[requiredDrug]);
+    state.drugInventory[requiredDrug] -= 1;
+    state.dropOffs.splice(dropOffIndex, 1);
+
+    // Log the drop-off and conversion
+    state.logger.logEvent('DropOff', `Converted Drug ${requiredDrug} at (${dropOff.x}, ${dropOff.y}) for $${DROPOFF_PRICES[requiredDrug]}.`);
+
+    // Optionally, deposit inventory if required
+    dealer.depositInventory();
+  } else {
+    // Inform the player they lack the required drug
+    state.logger.logEvent('DropOffAttempt', `Attempted to convert Drug ${requiredDrug} at (${dropOff.x}, ${dropOff.y}) but lacked the required quantity.`);
+    console.log(`Need Drug ${requiredDrug} to exchange at this drop-off.`);
+  }
+
+  // No direct UI updates; observer pattern handles it
+}
+
+/**
+ * Handles the collision with a thug.
+ * @param {Dealer} dealer 
+ * @param {GameState} state 
+ * @param {number} thugIndex 
+ * @param {object} thug 
+ */
+function handleThugCollision(dealer, state, thugIndex, thug) {
+  // Lose all carried money
+  state.subtractCarriedMoney(state.carriedMoney); // Sets carriedMoney to 0
+
+  // Optionally, reset dealer to stash
+  dealer.resetPosition();
+
+  // Log the thug collision and loss
+  state.logger.logCollision({
+    type: 'Thug',
+    involvedEntities: [`Thug at (${thug.x}, ${thug.y})`],
+    outcome: 'Lost all carried money.'
+  });
+
+  // Remove the thug from the game
+  state.thugs.splice(thugIndex, 1);
+}
+
+/**
+ * Checks if the dealer is at the stash position.
+ * @param {object} dealerHead 
+ * @param {object} stashPosition 
+ * @returns {boolean}
+ */
+function isAtStashPosition(dealerHead, stashPosition) {
+  return dealerHead.x === stashPosition.x && dealerHead.y === stashPosition.y;
 }

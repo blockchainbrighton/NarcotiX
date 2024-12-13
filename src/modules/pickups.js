@@ -1,5 +1,37 @@
 // modules/pickups.js
 
+// <!-- 
+{/* <details>
+  <summary>Module Summary: pickups.js</summary>
+  <ul>
+    <li><strong>Purpose:</strong> Manages spawning and handling of pickups, drop-offs, and thugs, controlling key resource flows and threats on the grid.</li>
+    <li><strong>Key Responsibilities:</strong>
+      <ul>
+        <li>Spawns pickups at intervals to provide the player with resources (drugs) to convert into money.</li>
+        <li>Generates drop-off points after the player acquires drugs, enabling conversion of drugs into funds.</li>
+        <li>Introduces thugs over time, adding risk and challenge to later rounds.</li>
+        <li>Updates thug positions and directions, adding dynamic hazards.</li>
+      </ul>
+    </li>
+    <li><strong>Interactions with Other Modules:</strong>
+      <ul>
+        <li><code>gameEngine.js</code>: Called by the main loop to regularly spawn pickups and possibly drop-offs/thugs.</li>
+        <li><code>logger.js</code>: Logs spawn events (pickups, drop-offs, thugs) for better tracking.</li>
+        <li><code>collision.js</code>: Drop-off and thug entities are checked during collisions with the dealer.</li>
+        <li><code>gameState.js</code>: Updates state arrays (e.g., pushing new pickups, drop-offs, or thugs).</li>
+      </ul>
+    </li>
+    <li><strong>Notes for Updates:</strong>
+      <ul>
+        <li>Balance spawn rates and intervals for improved gameplay difficulty and pacing.</li>
+        <li>If introducing new entity types (e.g., power-ups), integrate their spawn logic here.</li>
+      </ul>
+    </li>
+  </ul>
+</details> */}
+//-->
+
+
 import { getRandomInt } from './utils.js';
 import { 
   DROP_OFF_COLOR, 

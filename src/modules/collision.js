@@ -1,5 +1,38 @@
 // modules/collision.js
 
+//<!-- 
+{/* <details>
+  <summary>Module Summary: collision.js</summary>
+  <ul>
+    <li><strong>Purpose:</strong> Handles collision detection between the dealer and other entities, determining outcomes (e.g., collecting pickups, converting drugs at drop-offs, losing money to thugs).</li>
+    <li><strong>Key Responsibilities:</strong>
+      <ul>
+        <li>Checks dealer’s position against pickups, drop-offs, thugs, and stash.</li>
+        <li>On pickup collision: awards drugs, triggers drop-off spawns if needed.</li>
+        <li>On drop-off collision: converts drugs into money if player has required drug.</li>
+        <li>On thug collision: causes player to lose carried money.</li>
+        <li>On stash collision: triggers the stash decision process in the game engine.</li>
+      </ul>
+    </li>
+    <li><strong>Interactions with Other Modules:</strong>
+      <ul>
+        <li><code>dealer.js</code>: Modifies dealer’s inventory and position on certain collision outcomes.</li>
+        <li><code>pickups.js</code>: Spawns drop-offs after successful pickup events.</li>
+        <li><code>logger.js</code>: Logs collisions, attempts, and outcomes (conversion, thug losses).</li>
+        <li><code>gameState.js</code> and <code>stash.js</code>: Updates funds, checks round progression, handles stash visits.</li>
+      </ul>
+    </li>
+    <li><strong>Notes for Updates:</strong>
+      <ul>
+        <li>When introducing new entity types or collision-based effects (e.g., obstacles or power-ups), expand collision checks accordingly.</li>
+        <li>Maintain clear and informative logging for debugging complex interactions.</li>
+      </ul>
+    </li>
+  </ul>
+</details> */}
+//-->
+
+
 import { spawnDropOffs } from './pickups.js';
 import { STASH_LIMIT, PICKUP_PRICES, DROPOFF_PRICES, INITIAL_FUNDS } from './config.js';
 

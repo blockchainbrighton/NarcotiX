@@ -1,5 +1,35 @@
 // modules/ui.js
 
+//<!-- 
+{/* <details>
+  <summary>Module Summary: ui.js</summary>
+  <ul>
+    <li><strong>Purpose:</strong> Manages the game’s user interface elements outside the main canvas, including forms, modals, and displays in the control panel.</li>
+    <li><strong>Key Responsibilities:</strong>
+      <ul>
+        <li>Updates and displays information like cash holdings, stashed money, and active drop-offs.</li>
+        <li>Creates and manages the stash decision modal, allowing players to split money between stashing and carrying to the next round.</li>
+        <li>Ensures UI elements remain synchronized with the current <code>gameState</code> and <code>stash</code>.</li>
+      </ul>
+    </li>
+    <li><strong>Interactions with Other Modules:</strong>
+      <ul>
+        <li><code>gameState.js</code> and <code>stash.js</code>: Uses their data (funds, stash totals, drop-offs) to update the UI.</li>
+        <li><code>gameEngine.js</code> and <code>collision.js</code>: Invoked when the dealer reaches the stash and needs to make decisions.</li>
+      </ul>
+    </li>
+    <li><strong>Notes for Updates:</strong>
+      <ul>
+        <li>If new UI elements or forms are introduced (e.g., inventory management menus, tutorial pop-ups), integrate them here.</li>
+        <li>Maintain a user-friendly and accessible interface by ensuring forms and buttons have proper validation and feedback.</li>
+      </ul>
+    </li>
+  </ul>
+</details> */}
+//-->
+
+
+
 import { STASH_LIMIT } from './config.js';
 
 export class UI {

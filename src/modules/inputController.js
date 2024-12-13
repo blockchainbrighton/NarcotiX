@@ -1,5 +1,33 @@
 // modules/inputController.js
 
+//<!-- 
+{/* <details>
+  <summary>Module Summary: inputController.js</summary>
+  <ul>
+    <li><strong>Purpose:</strong> Captures and interprets player keyboard input to control the dealer’s movement.</li>
+    <li><strong>Key Responsibilities:</strong>
+      <ul>
+        <li>Listens for arrow keys (Up, Down, Left, Right) and WASD keys to change the dealer’s direction.</li>
+        <li>Logs direction changes for transparency and debugging.</li>
+      </ul>
+    </li>
+    <li><strong>Interactions with Other Modules:</strong>
+      <ul>
+        <li><code>dealer.js</code>: Invokes <code>changeDirection</code> method to adjust player movement.</li>
+        <li><code>logger.js</code>: Logs each direction change event.</li>
+      </ul>
+    </li>
+    <li><strong>Notes for Updates:</strong>
+      <ul>
+        <li>Additional controls (e.g., special actions, menu toggles) can be added by extending key handling.</li>
+        <li>Ensure new controls remain intuitive to the player.</li>
+      </ul>
+    </li>
+  </ul>
+</details> */}
+// -->
+
+
 export class InputController {
   constructor(dealer, logger) {
     this.dealer = dealer;

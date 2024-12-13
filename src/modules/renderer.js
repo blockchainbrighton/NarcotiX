@@ -1,5 +1,35 @@
 // modules/renderer.js
 
+//<!-- 
+{/* <details>
+  <summary>Module Summary: renderer.js</summary>
+  <ul>
+    <li><strong>Purpose:</strong> Responsible for all visual rendering of the game on the canvas and updating related UI elements (such as HUD and control panel).</li>
+    <li><strong>Key Responsibilities:</strong>
+      <ul>
+        <li>Draws the grid, dealer, pickups, drop-offs, thugs, and stash on the canvas.</li>
+        <li>Updates the on-screen HUD, including funds, carried money, and current drug inventory.</li>
+        <li>Manages the control panel elements like stash, cash holdings, and drop-off lists.</li>
+      </ul>
+    </li>
+    <li><strong>Interactions with Other Modules:</strong>
+      <ul>
+        <li><code>gameEngine.js</code>: Called each frame to reflect the current game state visually.</li>
+        <li><code>gameState.js</code>, <code>stash.js</code>, and <code>dealer.js</code>: Uses their data to update the display (positions, funds, inventory).</li>
+      </ul>
+    </li>
+    <li><strong>Notes for Updates:</strong>
+      <ul>
+        <li>When adding new entities or visual effects, update the drawing logic accordingly.</li>
+        <li>Keep the rendering process efficient and modular so it scales with additional game elements.</li>
+      </ul>
+    </li>
+  </ul>
+</details> */}
+// -->
+
+
+
 export class Renderer {
   constructor(ctx, state, dealer, stash) {
     this.ctx = ctx;

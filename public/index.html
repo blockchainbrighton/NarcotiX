@@ -4,6 +4,23 @@
   <meta charset="UTF-8">
   <title>NarcotiX Game</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Optional: Add some basic styling for the aggregated notes section */
+    #aggregatedNotes {
+      margin-top: 40px;
+      padding: 20px;
+      border-top: 2px solid #ccc;
+    }
+    #aggregatedNotes h2 {
+      margin-bottom: 20px;
+    }
+    #notesContainer details {
+      margin-bottom: 15px;
+    }
+    #notesContainer summary {
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <div id="gameContainer">
@@ -83,9 +100,101 @@
     </div>
   </div>
 
+  <!-- Aggregated Module Notes Section -->
+  <div id="aggregatedNotes">
+    <h2>NarcotiX Game Framework – Unified Context Document</h2>
+    <p><strong>Last Update:</strong> <span id="last-update">Loading...</span></p>
+    <div id="notesContainer">
+      <!-- Aggregated <details> notes will be injected here -->
+    </div>
+  </div>
+
   <!-- Stash Decision Modal -->
   <!-- This will be dynamically created by the UI module, but you can define its structure here if preferred -->
-  
+
+  <!-- Main Game Script -->
   <script type="module" src="/src/main.js"></script>
+
+  <!-- Aggregated Notes Script -->
+  <script>
+    // List of module file paths relative to the HTML file
+    const moduleFiles = [
+      'src/modules/config.js',
+      'src/modules/main.js',
+      'src/modules/gameEngine.js',
+      'src/modules/logger.js',
+      'src/modules/dealer.js',
+      'src/modules/inputController.js',
+      'src/modules/renderer.js',
+      'src/modules/gameState.js',
+      'src/modules/stash.js',
+      'src/modules/pickups.js',
+      'src/modules/collision.js',
+      'src/modules/ui.js',
+      'src/modules/utils.js' // Removed duplicate 'config.js'
+    ];
+
+    /**
+     * Fetches a JavaScript file and extracts the first <details>...</details> block.
+     * @param {string} filePath - The relative path to the JavaScript file.
+     * @returns {Promise<string>} - The extracted <details> HTML or an empty string.
+     */
+    async function fetchDetails(filePath) {
+      try {
+        const response = await fetch(filePath);
+        if (!response.ok) {
+          console.warn(`Failed to fetch ${filePath}: ${response.status} ${response.statusText}`);
+          return '';
+        }
+        const text = await response.text();
+        // Regex to match <details>...</details>, including multiline content
+        const detailsMatch = text.match(/<details>[\s\S]*?<\/details>/i);
+        return detailsMatch ? detailsMatch[0] : '';
+      } catch (error) {
+        console.error(`Error fetching ${filePath}:`, error);
+        return '';
+      }
+    }
+
+    /**
+     * Aggregates all <details> sections from the listed module files and injects them into the DOM.
+     */
+    async function aggregateNotes() {
+      const notesContainer = document.getElementById('notesContainer');
+      const lastUpdateElement = document.getElementById('last-update');
+      let aggregatedHTML = '';
+
+      for (const file of moduleFiles) {
+        const detailsHTML = await fetchDetails(file);
+        if (detailsHTML) {
+          aggregatedHTML += detailsHTML + '\n';
+        } else {
+          // Handle files without <details>
+          aggregatedHTML += `
+            <details>
+              <summary>Module Summary: ${getModuleName(file)}</summary>
+              <p>No notes available.</p>
+            </details>
+          `;
+        }
+      }
+
+      notesContainer.innerHTML = aggregatedHTML;
+      // Update the last update timestamp
+      lastUpdateElement.textContent = new Date().toLocaleString();
+    }
+
+    /**
+     * Extracts the module name from the file path.
+     * @param {string} filePath - The relative path to the JavaScript file.
+     * @returns {string} - The module name.
+     */
+    function getModuleName(filePath) {
+      return filePath.split('/').pop().replace('.js', '');
+    }
+
+    // Initialize aggregation on page load
+    window.addEventListener('DOMContentLoaded', aggregateNotes);
+  </script>
 </body>
 </html>

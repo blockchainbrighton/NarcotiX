@@ -1,5 +1,34 @@
 // modules/config.js
 
+//<!-- 
+{/* <details>
+  <summary>Module Summary: config.js</summary>
+  <ul>
+    <li><strong>Purpose:</strong> Centralizes all game configuration constants, making it easy to adjust gameplay parameters, visuals, and difficulty settings.</li>
+    <li><strong>Key Responsibilities:</strong>
+      <ul>
+        <li>Defines grid size, initial speed, initial funds, spawn rates, and other core game parameters.</li>
+        <li>Stores the stash limit, drop-off counts, pickup intervals, and thug spawn frequency for flexible balancing.</li>
+        <li>Defines drug types and their respective prices at pickups and drop-offs, controlling the game’s economy.</li>
+      </ul>
+    </li>
+    <li><strong>Interactions with Other Modules:</strong>
+      <ul>
+        <li><code>dealer.js</code>, <code>collision.js</code>, and <code>pickups.js</code>: Use pricing and spawn constants to adjust logic dynamically.</li>
+        <li><code>gameEngine.js</code> and <code>gameState.js</code>: Reference grid size, initial funds, and other start-up parameters.</li>
+      </ul>
+    </li>
+    <li><strong>Notes for Updates:</strong>
+      <ul>
+        <li>Adjust constants here to fine-tune game difficulty, pacing, and player progression.</li>
+        <li>When adding new drugs, enemies, or power-ups, define their properties here for centralized control.</li>
+      </ul>
+    </li>
+  </ul>
+</details> */}
+//-->
+
+
 export const GRID_SIZE = 36;
 export const INITIAL_SPEED = 5;
 export const INITIAL_FUNDS = 100; // Updated initial funds

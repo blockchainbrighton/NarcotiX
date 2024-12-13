@@ -1,4 +1,39 @@
 // modules/gameEngine.js
+// <!-- 
+// <details>
+//   <summary>Module Summary: gameEngine.js</summary>
+//   <ul>
+//     <li><strong>Purpose:</strong> The central controller of the game, managing the main loop, initialization, updates, rendering, pausing, and resuming.</li>
+//     <li><strong>Key Responsibilities:</strong>
+//       <ul>
+//         <li>Initialize game state, canvas, and all key components (Dealer, Stash, UI, Renderer, InputController).</li>
+//         <li>Execute the main game loop, including movement updates, collision checks, spawn logic for pickups/drop-offs/thugs, and rendering.</li>
+//         <li>Handle game flow elements like pausing, resuming, stash decisions, and transitioning between rounds.</li>
+//       </ul>
+//     </li>
+//     <li><strong>Interactions with Other Modules:</strong>
+//       <ul>
+//         <li><code>Logger</code>: Logs events (start, pause, resume, stash decisions, collisions) for debugging and game narrative.</li>
+//         <li><code>Dealer</code>: Controls player movement and actions. Receives direction from InputController and updates from the engine.</li>
+//         <li><code>InputController</code>: Processes user input and updates Dealer’s direction.</li>
+//         <li><code>Renderer</code>: Draws the current game state each frame.</li>
+//         <li><code>GameState</code>: Holds all dynamic data such as funds, positions, and round info. The engine updates and queries GameState constantly.</li>
+//         <li><code>Stash</code>: Manages depositing money and round transitions.</li>
+//         <li><code>pickups.js</code>: Spawns and manages pickups, drop-offs, and thugs as directed by the game loop.</li>
+//         <li><code>collision.js</code>: Checks and resolves interactions (e.g., pickup collection, drop-off conversions, thug encounters).</li>
+//         <li><code>UI</code>: Updates on-screen elements (HUD, stash decision modal) based on game events.</li>
+//       </ul>
+//     </li>
+//     <li><strong>Notes for Updates:</strong>
+//       <ul>
+//         <li>When adding new entities or gameplay mechanics, integrate their update cycles here (e.g., new spawn logic or movement calls).</li>
+//         <li>If adding new game states or transitions, ensure <code>state</code> and <code>UI</code> updates remain consistent.</li>
+//         <li>Maintain clear logging for major events so issues can be traced easily.</li>
+//       </ul>
+//     </li>
+//   </ul>
+// </details>
+// -->
 
 import { Logger } from './logger.js';
 import { Dealer } from './dealer.js';
@@ -43,13 +78,13 @@ let lastMoveTime = 0;
 
 let isPaused = false;
 
-
 // Initialize other game components
 const dealer = new Dealer(GRID_SIZE);
 const stash = new Stash(GRID_SIZE);
 const input = new InputController(dealer, logger); // Pass logger to InputController
 const renderer = new Renderer(ctx, state, dealer, stash);
 const ui = new UI(state, stash); // Initialize UI
+
 
 // Game Loop
 function gameLoop(timestamp) {
@@ -65,12 +100,12 @@ function gameLoop(timestamp) {
     if (timestamp - lastMoveTime > moveInterval) {
       dealer.move();
       spawnPickups(state);
-      logger.logEvent('DealerMove', `Dealer moved to (${dealer.head.x}, ${dealer.head.y}).`);
+      // Removed: logger.logEvent('DealerMove', ...)
 
       // Only spawn drop-offs if dealer has drugs and no drop-offs exist
       if (state.carriedMoney > 0 && state.dropOffs.length === 0) { 
         spawnDropOffs(state);
-        logger.logEvent('DropOffSpawn', `Spawned drop-off points for round ${state.round}.`);
+        // Removed redundant DropOffSpawn log as it's handled in collision.js
       }
 
       // Handle collisions and get the result
@@ -108,7 +143,11 @@ function gameLoop(timestamp) {
 
     // Move thugs
     moveThugs(state);
-    logger.logEvent('ThugMove', `Thugs have moved.`);
+    // Removed: logger.logEvent('ThugMove', ...)
+
+    // Optionally, log thug movements with throttling
+    // Uncomment the following line if you want to log thug moves but throttled
+    // state.logger.logThrottledEvent('ThugMove', `Thugs have moved.`);
 
     // Spawn thugs based on spawn rate
     spawnThugs(state, timestamp);

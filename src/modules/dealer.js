@@ -1,5 +1,38 @@
 // modules/dealer.js
 
+// <!-- 
+{/* <details>
+  <summary>Module Summary: dealer.js</summary>
+  <ul>
+    <li><strong>Purpose:</strong> Represents and controls the player character (the "Dealer") on the grid, handling movement, drug purchases, and inventory logic.</li>
+    <li><strong>Key Responsibilities:</strong>
+      <ul>
+        <li>Movement and direction changes while navigating the grid.</li>
+        <li>Inventory management: collecting pickups, updating position, and growing/shrinking segments.</li>
+        <li>Purchasing drugs with carried funds and allocating them to different drug types.</li>
+        <li>Facilitating stash decisions (how much to stash vs. carry forward).</li>
+      </ul>
+    </li>
+    <li><strong>Interactions with Other Modules:</strong>
+      <ul>
+        <li><code>gameEngine.js</code>: Receives updates on when to move and when to process collisions or stash decisions.</li>
+        <li><code>collision.js</code>: Dealer’s position determines collision outcomes, affecting inventory and funds.</li>
+        <li><code>GameState</code>: Shares information about current carried money, drug inventory, and stash decisions.</li>
+        <li><code>config.js</code>: Uses drug prices and available drug types when purchasing.</li>
+      </ul>
+    </li>
+    <li><strong>Notes for Updates:</strong>
+      <ul>
+        <li>When new drugs are introduced, update the purchase logic accordingly.</li>
+        <li>If adding special movement mechanics or power-ups, integrate smoothly into <code>move()</code> or <code>changeDirection()</code> logic.</li>
+        <li>Ensure that stash and carry logic remains balanced with new game features.</li>
+      </ul>
+    </li>
+  </ul>
+</details> */}
+
+
+
 import { PICKUP_PRICES, DRUG_TYPES } from './config.js';
 
 export class Dealer {

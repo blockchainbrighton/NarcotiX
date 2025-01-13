@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NarcotiX MVP</title>
+  <style>
+    /* 
+      BASIC STYLES
+      -------------
+      Customize as needed. This example uses absolute positioning for the canvas
+      and a simple debug HUD at the top. 
+    */
+    body {
+      margin: 0;
+      background-color: #222;
+      color: #fff;
+      font-family: sans-serif;
+    }
+    #gameCanvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #333;
+      border: 2px solid #fff;
+    }
+    #debugHUD {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .note {
+      font-size: 0.85rem;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Debug HUD for MVP: displays player and thug stats -->
+  <div id="debugHUD">
+    <div><strong>NarcotiX MVP</strong></div>
+    <div id="playerInfo"></div>
+    <div id="thugInfo"></div>
+    <div class="note">(Open console for more details)</div>
+  </div>
+
+  <!-- The game canvas -->
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+  <script>
+    /************************************************************
+     *  NARCOTIX MVP - Single-File Production Skeleton
+     *  --------------------------------------------------------
+     *  This file demonstrates a minimal structure for the game,
+     *  with placeholders and clear markers for expansions.
+     ************************************************************/
+
+    /************************************************************
+     *  1) DATA MODULE
+     *  --------------------------------------------------------
+     *  Contains static or dynamic data references, including:
+     *  - Game constants (e.g., speeds, map size)
+     *  - NFT metadata placeholders
+     *  - Future expansions: multiple NFTs, loaded from a server
+     ************************************************************/
+    const DataModule = (function () {
+      const GAME_WIDTH  = 600;
+      const GAME_HEIGHT = 400;
+      const PLAYER_SPEED = 1.0;
+      const THUG_SPEED   = 0.5;
+
+      // Placeholder: In a future iteration, you may pull real NFT data from Stacks
+      // or your backend. Each NFT could have unique stats, names, images, etc.
+      // e.g., fetch('/api/nft-metadata') -> parse -> store here
+
+      return {
+        GAME_WIDTH,
+        GAME_HEIGHT,
+        PLAYER_SPEED,
+        THUG_SPEED,
+      };
+    })();
+
+
+    /************************************************************
+     *  2) MAP MODULE
+     *  --------------------------------------------------------
+     *  Responsible for rendering the map and controlling terrain.
+     *  - Basic empty map for MVP
+     *  - Future expansions:
+     *    * Tiled terrain with obstacles
+     *    * Infinite or procedurally generated map
+     *    * Sectors or zones with unique behaviors
+     ************************************************************/
+    const MapModule = (function () {
+      // For this MVP, we'll just draw a background color on canvas
+      // Placeholder for a more advanced map.
+
+      function drawMap(ctx) {
+        // Currently, the entire canvas is just a background,
+        // but you could add roads, buildings, or tile-based logic here.
+        // Example: ctx.fillStyle = '#555'; ctx.fillRect(0, 0, width, height);
+      }
+
+      return {
+        drawMap,
+      };
+    })();
+
+
+    /************************************************************
+     *  3) PLAYER MODULE (NFT)
+     *  --------------------------------------------------------
+     *  This represents the player's NFT(s). For MVP, we have only one.
+     *  - Moves automatically in a straight line
+     *  - Has minimal stats: position, direction, inventory
+     *  - Future expansions:
+     *    * Multiple NFTs
+     *    * Unique abilities & stats from NFT metadata
+     *    * Real NFT ownership checks (via Stacks)
+     ************************************************************/
+    const PlayerModule = (function () {
+      // Minimal placeholder for one player’s NFT character
+      let player = {
+        x: 100,
+        y: 100,
+        vx: 1,  // velocity in x
+        vy: 0,  // velocity in y
+        speed: DataModule.PLAYER_SPEED,
+        color: 'lime',
+        size: 8,
+        inventory: 0,     // placeholder for "drugs" or items
+        money: 50,        // placeholder currency
+        maxInventory: 10, // placeholder capacity
+      };
+
+      function updatePlayer() {
+        // Move automatically
+        player.x += player.vx * player.speed;
+        player.y += player.vy * player.speed;
+
+        // Boundary check
+        if (player.x < 0) {
+          player.x = 0;
+          player.vx *= -1;
+        } else if (player.x > DataModule.GAME_WIDTH) {
+          player.x = DataModule.GAME_WIDTH;
+          player.vx *= -1;
+        }
+
+        if (player.y < 0) {
+          player.y = 0;
+          player.vy *= -1;
+        } else if (player.y > DataModule.GAME_HEIGHT) {
+          player.y = DataModule.GAME_HEIGHT;
+          player.vy *= -1;
+        }
+
+        // Placeholder: In the future, you could add collision detection with obstacles
+        // or logic for automatically finding new routes, etc.
+      }
+
+      function drawPlayer(ctx) {
+        ctx.fillStyle = player.color;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.size, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // Example function for manual direction changes
+      // Future expansions: hooking up real keyboard/mouse controls
+      function setDirection(vx, vy) {
+        player.vx = vx;
+        player.vy = vy;
+      }
+
+      return {
+        player,
+        updatePlayer,
+        drawPlayer,
+        setDirection,
+      };
+    })();
+
+
+    /************************************************************
+     *  4) ENEMY/THUG MODULE
+     *  --------------------------------------------------------
+     *  Basic logic for roaming thugs that can steal from players.
+     *  - Moves randomly
+     *  - Future expansions:
+     *    * Patrol routes
+     *    * Fighting mechanics
+     *    * Increased variety of enemies
+     ************************************************************/
+    const ThugModule = (function () {
+      let thug = {
+        x: 300,
+        y: 200,
+        vx: -0.5, // initial velocity
+        vy: 0.5,
+        speed: DataModule.THUG_SPEED,
+        color: 'red',
+        size: 8,
+      };
+
+      // Switch direction randomly after intervals
+      let directionTimer = 0;
+      let directionInterval = 120; // frames
+
+      function updateThug() {
+        thug.x += thug.vx * thug.speed;
+        thug.y += thug.vy * thug.speed;
+
+        // Boundary checks
+        if (thug.x < 0) {
+          thug.x = 0;
+          thug.vx *= -1;
+        } else if (thug.x > DataModule.GAME_WIDTH) {
+          thug.x = DataModule.GAME_WIDTH;
+          thug.vx *= -1;
+        }
+        if (thug.y < 0) {
+          thug.y = 0;
+          thug.vy *= -1;
+        } else if (thug.y > DataModule.GAME_HEIGHT) {
+          thug.y = DataModule.GAME_HEIGHT;
+          thug.vy *= -1;
+        }
+
+        // Randomly change direction every few frames
+        directionTimer++;
+        if (directionTimer > directionInterval) {
+          thug.vx = (Math.random() * 2 - 1); // range -1 to 1
+          thug.vy = (Math.random() * 2 - 1);
+          directionTimer = 0;
+        }
+      }
+
+      function drawThug(ctx) {
+        ctx.fillStyle = thug.color;
+        ctx.beginPath();
+        ctx.arc(thug.x, thug.y, thug.size, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      function resetThugPosition() {
+        // If in the future you want multiple thugs, random spawn logic, etc.
+        thug.x = 300;
+        thug.y = 200;
+      }
+
+      return {
+        thug,
+        updateThug,
+        drawThug,
+        resetThugPosition,
+      };
+    })();
+
+
+    /************************************************************
+     *  5) STASH HOUSE / ECONOMY MODULE
+     *  --------------------------------------------------------
+     *  Tracks stash houses and basic buy/sell logic (placeholder).
+     *  - Future expansions:
+     *    * Multiple stash houses
+     *    * Dynamic prices
+     *    * Additional items and comedic drug effects
+     ************************************************************/
+    const StashHouseModule = (function () {
+      // Minimal example: one stash house location
+      let stashHouse = {
+        x: 450,
+        y: 300,
+        size: 12,
+        color: 'blue',
+        buyPrice: 10,   // cost per item
+        sellPrice: 15,  // sale per item
+      };
+
+      function drawStashHouse(ctx) {
+        ctx.fillStyle = stashHouse.color;
+        ctx.fillRect(stashHouse.x - stashHouse.size / 2, stashHouse.y - stashHouse.size / 2,
+                     stashHouse.size, stashHouse.size);
+      }
+
+      // Basic detection to see if player is "close enough" to the stash house
+      function playerNearStash(player) {
+        const dx = stashHouse.x - player.x;
+        const dy = stashHouse.y - player.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        return dist < (stashHouse.size + player.size);
+      }
+
+      function buyOneItem(player) {
+        if (player.money >= stashHouse.buyPrice && player.inventory < player.maxInventory) {
+          player.money -= stashHouse.buyPrice;
+          player.inventory++;
+        }
+      }
+
+      function sellOneItem(player) {
+        if (player.inventory > 0) {
+          player.inventory--;
+          player.money += stashHouse.sellPrice;
+        }
+      }
+
+      return {
+        stashHouse,
+        drawStashHouse,
+        playerNearStash,
+        buyOneItem,
+        sellOneItem,
+      };
+    })();
+
+
+    /************************************************************
+     *  6) COLLISION & INTERACTION MODULE
+     *  --------------------------------------------------------
+     *  Checks collisions between player & thugs, and handles
+     *  theft or other interactions.
+     *  - Future expansions:
+     *    * Combat systems
+     *    * Health and damage
+     *    * More advanced behaviors (e.g., AI)
+     ************************************************************/
+    const CollisionModule = (function () {
+      function checkPlayerThugCollision(player, thug) {
+        const dx = thug.x - player.x;
+        const dy = thug.y - player.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = thug.size + player.size;
+        if (dist < minDist) {
+          // Simple robbery event:
+          if (player.inventory > 0) {
+            player.inventory = Math.max(0, player.inventory - 1);
+            console.log('Thug robbed 1 item from player!');
+          }
+        }
+      }
+
+      return {
+        checkPlayerThugCollision,
+      };
+    })();
+
+
+    /************************************************************
+     *  7) UI / EVENT HANDLER MODULE
+     *  --------------------------------------------------------
+     *  Handles user interactions and basic UI updates.
+     *  - Future expansions:
+     *    * Connect real wallet for NFT checks
+     *    * Keyboard/mouse for controlling direction
+     *    * On-screen UI for buy/sell, etc.
+     ************************************************************/
+    const UIModule = (function () {
+      const playerInfo = document.getElementById('playerInfo');
+      const thugInfo   = document.getElementById('thugInfo');
+
+      function updateHUD(player, thug) {
+        playerInfo.innerHTML = `
+          <div><strong>Player (NFT)</strong></div>
+          <div>Pos: (${player.x.toFixed(1)}, ${player.y.toFixed(1)})</div>
+          <div>Money: ${player.money}</div>
+          <div>Inventory: ${player.inventory}/${player.maxInventory}</div>
+          <div>Velocity: (${player.vx.toFixed(1)}, ${player.vy.toFixed(1)})</div>
+        `;
+        thugInfo.innerHTML = `
+          <div><strong>Thug</strong></div>
+          <div>Pos: (${thug.x.toFixed(1)}, ${thug.y.toFixed(1)})</div>
+          <div>Velocity: (${thug.vx.toFixed(1)}, ${thug.vy.toFixed(1)})</div>
+        `;
+      }
+
+      return {
+        updateHUD,
+      };
+    })();
+
+
+    /************************************************************
+     *  8) MAIN GAME LOOP / CORE LOGIC
+     *  --------------------------------------------------------
+     *  Orchestrates updates and draws for all modules.
+     *  - Future expansions:
+     *    * Additional states (e.g., main menu, paused state)
+     *    * Multiplayer sync or server integration
+     ************************************************************/
+    (function Main() {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      // Utility: For controlling direction manually (optional)
+      window.addEventListener('keydown', (e) => {
+        // Very simple key handling for demonstration:
+        // Up/Down/Left/Right arrow keys
+        if (e.key === 'ArrowUp') {
+          PlayerModule.setDirection(0, -1);
+        } else if (e.key === 'ArrowDown') {
+          PlayerModule.setDirection(0, 1);
+        } else if (e.key === 'ArrowLeft') {
+          PlayerModule.setDirection(-1, 0);
+        } else if (e.key === 'ArrowRight') {
+          PlayerModule.setDirection(1, 0);
+        } else if (e.key === 'b') {
+          // Example: Press 'b' to buy 1 item if near stash
+          if (StashHouseModule.playerNearStash(PlayerModule.player)) {
+            StashHouseModule.buyOneItem(PlayerModule.player);
+          }
+        } else if (e.key === 's') {
+          // Example: Press 's' to sell 1 item if near stash
+          if (StashHouseModule.playerNearStash(PlayerModule.player)) {
+            StashHouseModule.sellOneItem(PlayerModule.player);
+          }
+        }
+      });
+
+      function gameLoop() {
+        // 1) UPDATE
+        PlayerModule.updatePlayer();
+        ThugModule.updateThug();
+        
+        // Check collisions
+        CollisionModule.checkPlayerThugCollision(
+          PlayerModule.player,
+          ThugModule.thug
+        );
+
+        // 2) DRAW
+        ctx.clearRect(0, 0, DataModule.GAME_WIDTH, DataModule.GAME_HEIGHT);
+        
+        // Draw map (currently just a background)
+        MapModule.drawMap(ctx);
+
+        // Draw Stash House
+        StashHouseModule.drawStashHouse(ctx);
+
+        // Draw Player
+        PlayerModule.drawPlayer(ctx);
+
+        // Draw Thug
+        ThugModule.drawThug(ctx);
+
+        // 3) Update UI/HUD
+        UIModule.updateHUD(PlayerModule.player, ThugModule.thug);
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      // Start the game loop
+      gameLoop();
+
+      // Placeholder: In a future iteration, you’d integrate with
+      // real NFT ownership checks, or a server to handle persistence,
+      // or a backend for storing positions while offline, etc.
+    })();
+  </script>
+</body>
+</html>
